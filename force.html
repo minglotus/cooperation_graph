@@ -1,0 +1,169 @@
+<html>  
+  <head>  
+        <meta charset="utf-8">  
+        <title>力导向图</title>  
+  </head> 
+
+<style>
+
+
+</style>
+    <body>  
+		<script src="js/d3/d3.js" charset="utf-8"></script>
+        <script>
+			var node_array = [];
+			var node_dict = new Array();
+			var index_dict = new Array();
+			var edge_array = [];
+		//	var nodes = [{name: "dlfal"}, {name:"sadfadf"}];
+		//	var edges = [{source: "dlfal", target: "sadfadf"}];
+		/*	var nodes = [ { name: "dlfal" }, { name: "sadfadf" },
+				{ name: "厦门" }, { name: "杭州" },
+				{ name: "上海" }, { name: "青岛" },
+				{ name: "天津" } ];
+
+			var edges = [ { source : 0 , target: 1 } , { source : 0 , target: 2 } ,
+				{ source : 0 , target: 3 } , { source : 1 , target: 4 } ,
+				{ source : 1 , target: 5 } , { source : 1 , target: 6 } ];*/
+			d3.tsv("data/sample.tsv", function(error, edge_list) {
+				//console.log(edge_list);
+				if (error) {
+					console.log(error);
+				}
+				else {
+					var node_counter = 0;
+					var len = edge_list.length;
+					console.log(len);
+					for (var i = 0; i < len; i++) {
+						var node1 = edge_list[i].id1;
+						var node2 = edge_list[i].id2;
+						console.log(node1);
+						console.log(node2);
+						var src, dest;
+						if (node_dict[node1] == undefined) {
+							index_dict[node_counter] = node1;
+							src = node_counter;
+
+							var newnode = new Object();
+							newnode.name = node_counter;
+							node_array.push(newnode);
+
+							node_dict[node1] = node_counter++;
+						}
+						else {
+							src = node_dict[node1];
+						}
+						if (node_dict[node2] == undefined) {
+							index_dict[node_counter] = node2;
+							dest = node_counter;
+
+							var newnode = new Object();
+							newnode.name = node_counter;
+							node_array.push(newnode);
+
+							node_dict[node2] = node_counter++;
+						}
+						else {
+							dest = node_dict[node2];
+						}
+
+						var edge = new Object();
+						edge.source = src;
+						edge.target = dest;
+						//console.log(edge);
+						edge_array.push(edge);
+						//console.log(edge_array);
+					}
+				}
+				console.log(node_array);
+				console.log(edge_array);
+				var width = 1000;
+				var height = 1000;
+				var svg = d3.select("body")
+						.append("svg")
+						.attr("width",width)
+						.attr("height",height);
+
+				var force = d3.layout.force()
+						.nodes(node_array)		//指定节点数组
+						.links(edge_array)		//指定连线数组
+						.size([width,height])	//指定范围
+						.linkDistance(10)	//指定连线长度
+						.charge(-400);	//相互之间的作用力
+				force.start();	//开始作用
+				//添加连线
+				var svg_edges = svg.selectAll("line")
+						.data(edge_array)
+						.enter()
+						.append("line")
+						.style("stroke","#ccc")
+						.style("stroke-width",1);
+
+				var color = d3.scale.category20();
+
+				//添加节点
+				var svg_nodes = svg.selectAll("circle")
+						.data(node_array)
+						.enter()
+						.append("circle")
+						.attr("r",20)
+						.style("fill",function(d,i){
+							return color(i);
+						})
+						.call(force.drag);	//使得节点能够拖动
+				//添加描述节点的文字
+				var svg_texts = svg.selectAll("text")
+						.data(node_array)
+						.enter()
+						.append("text")
+						.style("fill", "black")
+						.attr("dx", 20)
+						.attr("dy", 8)
+						.text(function(d){
+							return d.name;
+						});
+				console.log("102\n");
+
+				force.on("tick", function(){	//对于每一个时间间隔
+
+					//更新连线坐标
+					svg_edges.attr("x1",function(d){ return d.source.x; })
+							.attr("y1",function(d){ return d.source.y; })
+							.attr("x2",function(d){ return d.target.x; })
+							.attr("y2",function(d){ return d.target.y; });
+
+					//更新节点坐标
+					svg_nodes.attr("cx",function(d){ return d.x; })
+							.attr("cy",function(d){ return d.y; });
+
+					//更新文字坐标
+					svg_texts.attr("x", function(d){ return d.x; })
+							.attr("y", function(d){ return d.y; });
+				});
+			});
+					/*node_set.forEach(function(element, sameElement, set){
+						var node = new Object();
+						node.name = element;
+						node_array.push(node);
+					});*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </script>  
+		
+    </body>  
+</html>  
